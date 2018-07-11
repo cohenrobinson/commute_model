@@ -18,7 +18,7 @@ class CommuteModel(Model):
     inequality on the way agents commute."""
 
     def __init__(self, N, width=200, height=100, city_pos=(100,50)):
-        self.N = N
+        self.num_agents = N
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
         self.make_commuteagents()
@@ -31,7 +31,7 @@ class CommuteModel(Model):
         self.running = True
 
     def make_commuteagents(self):
-        for unique_id in range(self.N):
+        for unique_id in range(self.num_agents):
             x = random.randarrange(self.grid.width)
             y = random.randarrange(self.grid.height)
             pos = (x, y)

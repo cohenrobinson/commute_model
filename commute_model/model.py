@@ -6,6 +6,8 @@ from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 
+CITY_POS = (width//2, height//2)
+
 def compute_gini(model):
     agent_wealths = [agent.wealth for agent in model.schedule.agents]
     x = sorted(agent_wealths)
@@ -17,8 +19,7 @@ class CommuteModel(Model):
     """This agent-based model seeks to demonstrate the effect of spatial
     inequality on the way agents commute."""
 
-    def __init__(self, N, width=200, height=100):
-        city_pos = (width//2, height//2)
+    def __init__(self, N, width=200, height=100, city_pos):
         self.N = N
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
@@ -81,7 +82,7 @@ class CommuteAgent(Agent):
     def pt_avaliablity(self, city_pos):
         total_distance = sqrt(city_pos[0]**2 + city_pos**2)
         return 1 - self.dis_city / total_distance
-        
+
 class CityAgent(Agent):
     """An agent representing the city centre."""
     def __init__(self, city_pos):

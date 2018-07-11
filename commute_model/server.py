@@ -37,8 +37,10 @@ chart = ChartModule([
 model_params = {
     "N": UserSettableParameter('slider', "Number of agents", 100, 2, 200, 1,
                                description="Choose how many agents to include in the model"),
-    "width": 10,
-    "height": 10
+    "width": 200,
+    "height": 200,
+    "city_pos": (100, 100)
+
 }
 
 server = ModularServer(CommuteModel, [grid, chart], "Commute Model", model_params)

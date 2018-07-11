@@ -28,7 +28,7 @@ def agent_portrayal(agent):
 
     return portrayal
 
-rid = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
+grid = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
 chart = ChartModule([
     {"Label": "Gini", "Color": "#0000FF"}],
     data_collector_name='datacollector'

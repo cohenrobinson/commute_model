@@ -41,5 +41,5 @@ model_params = {
     "height": 10
 }
 
-server = ModularServer(MoneyModel, [grid, chart], "Money Model", model_params)
+server = ModularServer(CommuteModel, [grid, chart], "Commute Model", model_params)
 server.port = 8521

@@ -19,7 +19,7 @@ class CommuteModel(Model):
     """This agent-based model seeks to demonstrate the effect of spatial
     inequality on the way agents commute."""
 
-    def __init__(self, N, width=200, height=100, city_pos):
+    def __init__(self, N, width=200, height=100, city_pos=(100,50)):
         self.N = N
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)

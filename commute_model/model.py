@@ -17,7 +17,7 @@ class CommuteModel(Model):
     """This agent-based model seeks to demonstrate the effect of spatial
     inequality on the way agents commute."""
 
-    def __init__(self, N, width, height, city_pos):
+    def __init__(self, N, initial_wealth, cost_per_pixel, pt_cost, cost_to_move, pt_aval, width, height, city_pos):
         self.num_agents = N
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
@@ -28,7 +28,7 @@ class CommuteModel(Model):
             y = random.randrange(self.grid.height)
             pos = (x, y)
             if self.grid.is_cell_empty(pos):
-                a = CommuteAgent(unique_id, self, pos, city_pos)
+                a = CommuteAgent(unique_id, self, pos, city_pos, initial_wealth, cost_per_pixel, pt_cost, cost_to_move, pt_aval)
                 self.schedule.add(a)
                 self.grid.place_agent(a, pos)
 
@@ -52,39 +52,53 @@ class CommuteModel(Model):
 class CommuteAgent(Agent):
     """An agent that follows behaviour shown in the README.md."""
 
-    def __init__(self, unique_id, model, pos, city_pos):
+    def __init__(self, unique_id, model, pos, city_pos, initial_wealth, cost_per_pixel, pt_cost, cost_to_move, pt_aval):
         super().__init__(unique_id, model)
         self.city_pos = city_pos
         self.pos = pos
         self.dis_city = sqrt((city_pos[0]-pos[0])**2+(city_pos[1]-pos[1])**2)
-        self.wealth = 10
+        self.wealth = initial_wealth
         self.type = 'agent'
+        self.pt_cost = pt_cost
+        self.cost_per_pixel = cost_per_pixel
+        self.cost_to_move = cost_to_move
+        self.pt_aval = pt_aval
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
             self.pos, moore=True, include_center=False)
-        new_position = random.choice(possible_steps)
+        new_position = (0, 0)
+        for pos in possible_steps:
+            if sqrt((pos[0]-self.city_pos[0])**2+(pos[1]-self.city_pos[1])**2) <= sqrt((new_position[0]-self.city_pos[0])**2 + (new_position[1]-self.city_pos[1])**2):
+                if self.model.grid.is_cell_empty(pos):
+                    new_position = pos
         self.model.grid.move_agent(self, new_position)
-        self.wealth -= 15
+        self.wealth -= self.cost_to_move
+
     def commute(self):
+        cost_of_carcommute = int(self.dis_city*self.cost_per_pixel)
         # commute by PT
-        if random.random() <= self.pt_avaliablity():
-            if self.wealth >= 2:
-                self.wealth -= 2
+        if random.random() <= self.pt_avaliablity() and self.pt_cost <= cost_of_carcommute:
+            if self.wealth > self.pt_cost:
+                self.wealth -= self.pt_cost
                 self.wealth += 5
         # commute by car
         else:
-            if self.wealth >= 7:
-                self.wealth -= 7
+            if self.wealth > cost_of_carcommute:
+                self.wealth -= cost_of_carcommute
                 self.wealth += 5
 
     def pt_avaliablity(self):
         total_distance = sqrt(self.city_pos[0]**2 + self.city_pos[1]**2)
-        return 1 - self.dis_city / total_distance
+        prob_pt = self.pt_aval * 1 - (self.dis_city) / total_distance
+        if prob_pt >= 1:
+            return 1
+
+        return prob_pt
 
     def step(self):
         self.commute()
-        if self.wealth >= 20:
+        if self.wealth >= 40:
             self.move()
 
 class CityAgent(Agent):

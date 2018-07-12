@@ -10,8 +10,16 @@ def compute_gini(model):
     agent_wealths = [agent.wealth for agent in model.schedule.agents]
     x = sorted(agent_wealths)
     N = model.num_agents
+    if sum(x) == 0:
+        return 0
     B = sum(xi * (N - i) for i, xi in enumerate(x)) / (N * sum(x))
     return (1 + (1 / N) - 2 * B)
+
+def compute_avg_wealth(model):
+    agent_wealths = [agent.wealth for agent in model.schedule.agents]
+    x = sorted(agent_wealths)
+    N = model.num_agents
+    return sum(x) / N
 
 class CommuteModel(Model):
     """This agent-based model seeks to demonstrate the effect of spatial
@@ -33,17 +41,24 @@ class CommuteModel(Model):
                 self.grid.place_agent(a, pos)
 
         self.grid.place_agent(CityAgent(city_pos), city_pos)
-        self.datacollector = DataCollector(
+        self.ginicollector = DataCollector(
             model_reporters={"Gini": compute_gini},
             agent_reporters={"Wealth": "wealth"}
         )
-        self.datacollector.collect(self)
+        self.avgcollector = DataCollector(
+            model_reporters={"Average Income": compute_avg_wealth},
+            agent_reporters={"Wealth": "wealth"}
+        )
+        self.ginicollector.collect(self)
+        self.avgcollector.collect(self)
+
         self.running = True
 
     def step(self):
         self.schedule.step()
         # collect data
-        self.datacollector.collect(self)
+        self.ginicollector.collect(self)
+        self.avgcollector.collect(self)
 
     def run_model(self, n):
         for i in range(n):
@@ -65,26 +80,27 @@ class CommuteAgent(Agent):
         self.pt_aval = pt_aval
 
     def move(self):
-        possible_steps = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False)
-        new_position = (0, 0)
-        for pos in possible_steps:
-            if sqrt((pos[0]-self.city_pos[0])**2+(pos[1]-self.city_pos[1])**2) <= sqrt((new_position[0]-self.city_pos[0])**2 + (new_position[1]-self.city_pos[1])**2):
-                if self.model.grid.is_cell_empty(pos):
-                    new_position = pos
-        self.model.grid.move_agent(self, new_position)
-        self.wealth -= self.cost_to_move
+        if self.wealth >= self.cost_to_move + 5:
+            possible_steps = self.model.grid.get_neighborhood(
+                self.pos, moore=True, include_center=False)
+            new_position = (0, 0)
+            for pos in possible_steps:
+                if sqrt((pos[0]-self.city_pos[0])**2+(pos[1]-self.city_pos[1])**2) < sqrt((new_position[0]-self.city_pos[0])**2 + (new_position[1]-self.city_pos[1])**2):
+                    if self.model.grid.is_cell_empty(pos):
+                        new_position = pos
+            self.model.grid.move_agent(self, new_position)
+            self.wealth -= self.cost_to_move
 
     def commute(self):
         cost_of_carcommute = int(self.dis_city*self.cost_per_pixel)
         # commute by PT
         if random.random() <= self.pt_avaliablity() and self.pt_cost <= cost_of_carcommute:
-            if self.wealth > self.pt_cost:
+            if self.wealth >= self.pt_cost:
                 self.wealth -= self.pt_cost
                 self.wealth += 5
         # commute by car
         else:
-            if self.wealth > cost_of_carcommute:
+            if self.wealth >= cost_of_carcommute:
                 self.wealth -= cost_of_carcommute
                 self.wealth += 5
 
@@ -98,8 +114,9 @@ class CommuteAgent(Agent):
 
     def step(self):
         self.commute()
-        if self.wealth >= 40:
-            self.move()
+        self.move()
+        # cost of living
+        self.wealth -= 1
 
 class CityAgent(Agent):
     """An agent representing the city centre."""

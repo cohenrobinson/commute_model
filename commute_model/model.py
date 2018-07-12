@@ -17,28 +17,28 @@ class CommuteModel(Model):
     """This agent-based model seeks to demonstrate the effect of spatial
     inequality on the way agents commute."""
 
-    def __init__(self, N, width=200, height=100, city_pos=(100,50)):
+    def __init__(self, N, width, height, city_pos):
         self.num_agents = N
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
-        self.make_commuteagents()
-        self.grid.place_agent(CityAgent(city_pos))
+
+        # place commute agents
+        for unique_id in range(self.num_agents):
+            x = random.randrange(self.grid.width)
+            y = random.randrange(self.grid.height)
+            pos = (x, y)
+            if self.grid.is_cell_empty(pos):
+                a = CommuteAgent(unique_id, self, pos, city_pos)
+                self.schedule.add(a)
+                self.grid.place_agent(a, pos)
+
+        self.grid.place_agent(CityAgent(city_pos), city_pos)
         self.datacollector = DataCollector(
             model_reporters={"Gini": compute_gini},
             agent_reporters={"Wealth": "wealth"}
         )
         self.datacollector.collect(self)
         self.running = True
-
-    def make_commuteagents(self):
-        for unique_id in range(self.num_agents):
-            x = random.randarrange(self.grid.width)
-            y = random.randarrange(self.grid.height)
-            pos = (x, y)
-            if self.grid.is_cell_empty(pos):
-                a = CommuteAgent(unique_id, self, pos, city_pos, width, height)
-                self.schedule.add(a)
-                self.grid.place_agent(a, pos)
 
     def step(self):
         self.schedule.step()
@@ -52,7 +52,7 @@ class CommuteModel(Model):
 class CommuteAgent(Agent):
     """An agent that follows behaviour shown in the README.md."""
 
-    def __init(self, unique_id, model, pos, city_pos):
+    def __init__(self, unique_id, model, pos, city_pos):
         super().__init__(unique_id, model)
         self.pos = pos
         self.dis_city = sqrt((city_pos[0]-pos[0])**2+(city_pos[1]-pos[1])**2)

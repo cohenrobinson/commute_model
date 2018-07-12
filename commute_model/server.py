@@ -11,8 +11,8 @@ def agent_portrayal(agent):
                  "r": 0.5}
     if agent.type == 'city':
         portrayal["Color"] = "black"
-        portrayal["Layer"] = 3
-        portrayal["Shape"] = "square"
+        portrayal["Layer"] = 0
+        portrayal["Shape"] = "circle"
 
         return portrayal
 

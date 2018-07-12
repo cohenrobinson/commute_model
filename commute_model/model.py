@@ -54,6 +54,7 @@ class CommuteAgent(Agent):
 
     def __init__(self, unique_id, model, pos, city_pos):
         super().__init__(unique_id, model)
+        self.city_pos = city_pos
         self.pos = pos
         self.dis_city = sqrt((city_pos[0]-pos[0])**2+(city_pos[1]-pos[1])**2)
         self.wealth = 10
@@ -64,22 +65,27 @@ class CommuteAgent(Agent):
             self.pos, moore=True, include_center=False)
         new_position = random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
-        self.wealth -= 20
-    def commute(self, city_pos):
+        self.wealth -= 15
+    def commute(self):
         # commute by PT
-        if random.random() <= self.pt_avaliablity(self, city_):
+        if random.random() <= self.pt_avaliablity():
             if self.wealth >= 2:
                 self.wealth -= 2
                 self.wealth += 5
         # commute by car
         else:
-            if self.wealth >= 6:
-                self.wealth -= 6
+            if self.wealth >= 7:
+                self.wealth -= 7
                 self.wealth += 5
 
-    def pt_avaliablity(self, city_pos):
-        total_distance = sqrt(city_pos[0]**2 + city_pos**2)
+    def pt_avaliablity(self):
+        total_distance = sqrt(self.city_pos[0]**2 + self.city_pos[1]**2)
         return 1 - self.dis_city / total_distance
+
+    def step(self):
+        self.commute()
+        if self.wealth >= 20:
+            self.move()
 
 class CityAgent(Agent):
     """An agent representing the city centre."""

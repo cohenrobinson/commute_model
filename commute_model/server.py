@@ -13,7 +13,7 @@ def agent_portrayal(agent):
         portrayal["Color"] = "black"
         portrayal["Layer"] = 0
         portrayal["Shape"] = "circle"
-        portrayal["r"] = 2
+        portrayal["r"] = 1
 
         return portrayal
 
@@ -29,7 +29,7 @@ def agent_portrayal(agent):
 
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 200, 200, 1000, 1000)
+grid = CanvasGrid(agent_portrayal, 150, 150, 1000, 1000)
 gini_chart = ChartModule([
     {"Label": "Gini", "Color": "#0000FF"}],
     data_collector_name='ginicollector'
@@ -46,9 +46,9 @@ model_params = {
     "pt_cost": UserSettableParameter('slider', "Cost of PT Travel", 2, 1, 10, 1),
     "cost_to_move": UserSettableParameter('slider', "Cost of Moving/Selling", 30, 10, 60, 1),
     "pt_aval": UserSettableParameter('slider', "Avaliablity of PT over distance", 1, 0.1, 3, 0.1),
-    "width": 200,
-    "height": 200,
-    "city_pos": (100, 100)
+    "width": 150,
+    "height": 150,
+    "city_pos": (75, 75)
 
 }
 

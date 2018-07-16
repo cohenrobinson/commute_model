@@ -1,0 +1,20 @@
+{
+  "name": "commute_model",
+  "version": "1.0.0",
+  "description": "An agent-based model showing emergent behaviour from transport inequality.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cohenrobinson/commute_model.git"
+  },
+  "keywords": ["abm", "agent-based-modelling", "agent", "behaviour", "commute", "modelling", "mesa", "python", "city"],
+  "author": "Cohen Robinson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cohenrobinson/commute_model/issues"
+  },
+  "homepage": "https://github.com/cohenrobinson/commute_model#readme"
+}
